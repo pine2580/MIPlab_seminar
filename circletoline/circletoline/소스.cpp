@@ -83,7 +83,7 @@ void circleXY(int i, int r1_x, int r1_y, int o_x, int o_y, int x, int y, int *a_
 
 	}
 }
-void calvalue(colorimg** CImg, colorimg** img, int x, int y, int *a_x, int *a_y, int*b_x, int*b_y, int*c_x, int*c_y, int*d_x, int*d_y, float *sub_x, float *sub_y)
+void bilinearInterpolation(colorimg** CImg, colorimg** img, int x, int y, int *a_x, int *a_y, int*b_x, int*b_y, int*c_x, int*c_y, int*d_x, int*d_y, float *sub_x, float *sub_y)
 {
 	for (int j = 0; j < y; j++)
 	{
@@ -126,7 +126,7 @@ void main()
 	for (int i = 0; i <line_width; i++)//가로로 한줄씩
 	{
 		circleXY(i, r1_x, r1_y, o_x, o_y, line_width, line_height, a_x, a_y, b_x, b_y, c_x, c_y, d_x, d_y, sub_x, sub_y);
-		calvalue(CImg, lineimg, i, line_height, a_x, a_y, b_x, b_y, c_x, c_y, d_x, d_y, sub_x, sub_y);
+		bilinearInterpolation(CImg, lineimg, i, line_height, a_x, a_y, b_x, b_y, c_x, c_y, d_x, d_y, sub_x, sub_y);
 	}
 	WriteImage_color("C:\\Users\\김송란\\Documents\\네이트온 받은 파일\\숙제2-테스트영상\\test_out2.bmp", lineimg, line_width, line_height);
 
