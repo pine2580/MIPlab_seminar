@@ -12,6 +12,7 @@
 #include <io.h>
 #include <conio.h>
 
+#include <atlstr.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -19,6 +20,14 @@
 using namespace std;
 using namespace cv;
 
+typedef struct
+{
+	int part1;
+	int part2;
+	int part3;
+	int part4;
+	char shape;
+};
 int** IntAlloc2(int width, int height);
 void IntFree2(int** image, int width, int height);
 int** ReadImage(char* name, int* width, int* height);
