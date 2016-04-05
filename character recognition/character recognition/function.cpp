@@ -57,7 +57,6 @@ int get_files_count()
 	}
 	return i;
 }
-
 vector<wstring> get_files_name(wstring directory)
 {
 	vector<wstring> files;
@@ -80,7 +79,9 @@ vector<wstring> get_files_name(wstring directory)
 void Char_Feature(Mat A, int y, int x,CHARACTER& feature)
 {
 	//char search = '[';
-
+	feature.sum1=0, feature.sum2 = 0,feature.sum3=0,feature.sum4=0;
+	feature.ratex = 0, feature.ratey = 0;
+	feature.avg1 = 0, feature.avg2 = 0, feature.avg3 = 0, feature.avg4 = 0;
 	for (int i = 0; i < y/2; i++)
 		for (int j = 0; j < x/2; j++)
 		{
@@ -110,7 +111,11 @@ void Char_Feature(Mat A, int y, int x,CHARACTER& feature)
 		}
 	feature.ratex = (feature.sum1 +feature.sum3)/ (feature.sum2+feature.sum4);
 	feature.ratey = (feature.sum1+feature.sum2) / (feature.sum3+feature.sum4);
-	
+	feature.avg1 = ((feature.sum1 + feature.sum3) / (x*y))*100;
+	feature.avg2 = ((feature.sum2 + feature.sum3) / (x*y)) * 100;
+	feature.avg3 = ((feature.sum1 + feature.sum2) / (x*y)) * 100;
+	feature.avg4 = ((feature.sum3 + feature.sum4) / (x*y)) * 100;
+
 	//feature.avg4 = feature.sum4 / ((x / 2)*(y / 2));
 	//int temp= name.find('[');
 	//character.shape = name.Mid(temp, 3);
@@ -145,44 +150,97 @@ void Char_Feature_avg(CHARACTER* charname,int file_count, CHARACTER *feature)
 		n = 0;
 		charname[i].ratex = 0;
 		charname[i].ratey = 0;
+		charname[i].avg1 = 0, charname[i].avg2 = 0, charname[i].avg3 = 0, charname[i].avg4 = 0;
 		for (int j = 0; j < file_count; j++)
 		{
 			if (charname[i].shape.compare(feature[j].shape) == 0)
 			{
 				charname[i].ratex += feature[j].ratex;
 				charname[i].ratey += feature[j].ratey;
+				charname[i].avg1 += feature[j].avg1;
+				charname[i].avg2 += feature[j].avg2;
+				charname[i].avg3 += feature[j].avg3;
+				charname[i].avg4 += feature[j].avg4;
 				n++;
 			}
 		}
 		charname[i].ratex = charname[i].ratex / n;
 		charname[i].ratey = charname[i].ratey / n;
+		charname[i].avg1 = charname[i].avg1/n;
+		charname[i].avg2 = charname[i].avg2/n;
+		charname[i].avg3 = charname[i].avg3/n;
+		charname[i].avg4 = charname[i].avg4/n;
 	}
 }
-int OptSample(CHARACTER *database_Char, CHARACTER& input_Char,int min_err, int file_count)
+void OptSample(CHARACTER *charname, CHARACTER &input_Char, int*Optnum)
 {
-	double err=0,err2=0;
-	double min_err2 = min_err;
+	double err1 = 0, err2 = 0, err = 0;
+	double min_err1 = 10, min_err2 = 10, min_err = 20.0;
+	double avg_err, avg_minerr = 10;
 	int num=0;
-	for (int i = 0; i < file_count; i++)
+	int num1 = 0, num2 = 0, num3 = 0;
+	double sub_err1, sub_err2, sub_err3, sub_err4;
+	double part4err = 0;
+	double part4_minerr = 100*100;
+	//for (int i = 0; i < 48; i++)
+	//{
+	//	err = (abs(charname[i].ratex - ratex)) + (abs(charname[i].ratey - ratey));
+	//	if (err <0.15)
+	//	{
+	//		avg_err = abs(charname[i].avg1 - avg1) + abs(charname[i].avg2 - avg2) + abs(charname[i].avg3 - avg3) + abs(charname[i].avg4 - avg4);
+	//		if (avg_err < avg_minerr)
+	//		{
+	//			num = i;
+	//			avg_minerr = avg_err;
+	//		}
+	//			
+	//	}
+	//}
+	//*Optnum = num;
+	for (int i = 0; i < 50; i++)
 	{
-		err += abs((database_Char[i].avg1 + database_Char[i].avg3) - (input_Char.avg1 + input_Char.avg3));
-		err += abs((database_Char[i].avg2 + database_Char[i].avg4) - (input_Char.avg2 + input_Char.avg4));
-		if (err < min_err)
+		sub_err1 = abs(charname[i].avg1 - input_Char.avg1);
+		sub_err2 = abs(charname[i].avg2 - input_Char.avg2);
+		sub_err3 = abs(charname[i].avg3 - input_Char.avg3);
+		sub_err4 = abs(charname[i].avg4 - input_Char.avg4);
+		part4err = sub_err1 + sub_err2 + sub_err3 + sub_err4;
+		if(part4err<part4_minerr)
 		{
-			min_err = err;
-			err2 += abs((database_Char[i].avg1 - input_Char.avg1));
-			err2 += abs((database_Char[i].avg2 - input_Char.avg2));
-			err2 += abs((database_Char[i].avg3 - input_Char.avg3));
-			err2 += abs((database_Char[i].avg4 - input_Char.avg4));
-			if (err2 < min_err2)
-			{
-				min_err2 = err2;
-				num = i;
-			}	
+			part4_minerr = part4err;
+			num = i;
 		}
 	}
-	return num;
+	*Optnum = num;
 }
+void QuickSort(double *ar, int num)
+
+{
+	int left, right;
+	char key;
+
+	if (num <= 1) return;
+	// 기준값 결정 : 배열상의 제일 끝 요소
+	key = ar[num - 1];
+	for (left = 0, right = num - 2;; left++, right--)
+	{
+		while (ar[left] < key)
+		{
+			left++;
+		}
+		while (ar[right] > key)
+		{
+			right--;
+		}
+
+		if (left >= right) break;            // 좌우가 만나면 끝
+		SWAP(ar[left], ar[right]);
+
+	}
+	SWAP(ar[left], ar[num - 1]);                   // 기준값과 i위치의 값 교환
+	QuickSort(ar, left);                           // 왼쪽 구간 정렬
+	QuickSort(ar + left + 1, num - left - 1);        // 오른쪽 구간 정렬
+}
+
 void Binary(Mat B)
 {
 	for (int i = 0; i < B.rows; i++)

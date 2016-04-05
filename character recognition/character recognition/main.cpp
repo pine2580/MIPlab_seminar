@@ -2,10 +2,7 @@
 
 void main()
 {
-	//int file_count = 0;
-	//file_count = get_files_count();
-	//printf("%d\n", file_count);
-
+	
 	//vector<wstring> vFileNames = get_files_name(L"C:\\Users\\김송란\\Desktop\\송란이폴더\\랩세미나\\201603\\MunjaDB_IMG20160323\\*.bmp");
 	//vector<wstring> vFileNames = get_files_name(L"C:\\Users\\김송란\\Desktop\\송란이폴더\\랩세미나\\201603\\test\\*.bmp");
 	vector<wstring> vFileNames = get_files_name(L"C:\\Users\\김송란\\Documents\\GitHub\\MIPlab_seminar\\character recognition\\character recognition\\*.bmp");
@@ -45,13 +42,26 @@ void main()
 
 	for (int i = 0; i < 50; i++)
 	{
-		cout << charname[i].shape<<" "<< charname[i].ratex << "  " << charname[i].ratey << endl;
+		cout << charname[i].shape<<"          "<< charname[i].ratex << "  " << charname[i].ratey <<" / "<< charname[i].avg1<< " / "<< charname[i].avg2<<" / "<< charname[i].avg3<<" / "<< charname[i].avg4<<endl;
+	}
+
+	int Optnum;
+	CHARACTER input_Char;
+	//string temp;
+	//vector<wstring> inputfilenames = get_files_name(L"C:\\Users\\김송란\\Documents\\GitHub\\MIPlab_seminar\\character recognition\\character recognition\\*.bmp");
+	char dbname[200];
+	for (int i = 1; i <89; i++)
+	{
+		//sprintf(dbname, "C:\\Users\\김송란\\Documents\\카카오톡 받은 파일\\문자추출\\test%03d.bmp", i);
+		sprintf(dbname, "C:\\Users\\김송란\\Documents\\카카오톡 받은 파일\\문자추출리사이즈\\resize%03d.bmp", i);
+		Mat B = imread(dbname, IMREAD_GRAYSCALE);
+		Char_Feature(B, B.rows, B.cols, input_Char);
+		OptSample(charname, input_Char, &Optnum);
+		cout << i << "  입력문자는 " << charname[Optnum].shape << "특징 - "<<charname[Optnum].avg1<< " / "<< charname[Optnum].avg2<<" / "<< charname[Optnum].avg3<<" / "<< charname[Optnum].avg4<<endl;
 	}
 
 
-
-
-
+	
 	//CHARACTER input_Char;
 	//Mat B = imread("C:\\Users\\김송란\\Documents\\GitHub\\MIPlab_seminar\\character recognition\\lineImg.bmp", IMREAD_GRAYSCALE); //입력 이미지
 	//Binary(B);

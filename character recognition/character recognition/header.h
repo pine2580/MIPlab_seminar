@@ -19,6 +19,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#define SWAP(a,b) int temp=a; a=b; b=temp;
 using namespace std;
 using namespace cv;
 
@@ -38,7 +39,7 @@ void WriteImage(char* name, int** image, int width, int height);
 int get_files_count();
 vector<wstring> get_files_name(wstring);
 void Char_Feature(Mat,int,int,CHARACTER&);
-int OptSample(CHARACTER*, CHARACTER&, int, int);
+void OptSample(CHARACTER*, CHARACTER& ,int*);
 void Binary(Mat);
 void Find_MaxMin(Mat B, int* y_max, int* x_max, int* y_min, int* x_min);
 void MakingBox(Mat ,Mat,Mat ,int* y_max, int* x_max, int* y_min, int* x_min, int label_count);
