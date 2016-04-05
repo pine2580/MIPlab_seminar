@@ -108,11 +108,55 @@ void Char_Feature(Mat A, int y, int x,CHARACTER& feature)
 			if (A.at<uchar>(i, j) == 255)
 				feature.sum4 += 1;
 		}
-	feature.ratex = feature.sum1 / feature.sum3;
-	feature.ratey = feature.sum2 / feature.sum4;
+	feature.ratex = (feature.sum1 +feature.sum3)/ (feature.sum2+feature.sum4);
+	feature.ratey = (feature.sum1+feature.sum2) / (feature.sum3+feature.sum4);
+	
 	//feature.avg4 = feature.sum4 / ((x / 2)*(y / 2));
 	//int temp= name.find('[');
 	//character.shape = name.Mid(temp, 3);
+}
+void Filename(int file_count, CHARACTER* feature, CHARACTER *charname)
+{
+	int count ;
+	int n = 0;
+	int m;
+	for (int i = 0; i < file_count; i++)
+	{
+		count = 0;
+		for (int j = 0; j <50; j++)
+		{
+			if (charname[j].shape.compare(feature[i].shape) == 0)
+			{
+				count++;
+			}
+		}
+		if (count == 0)
+		{
+			charname[n].shape = feature[i].shape;
+			n++;
+		}
+	}
+}
+void Char_Feature_avg(CHARACTER* charname,int file_count, CHARACTER *feature)
+{
+	int n;
+	for (int i = 0; i < 50; i++)
+	{
+		n = 0;
+		charname[i].ratex = 0;
+		charname[i].ratey = 0;
+		for (int j = 0; j < file_count; j++)
+		{
+			if (charname[i].shape.compare(feature[j].shape) == 0)
+			{
+				charname[i].ratex += feature[j].ratex;
+				charname[i].ratey += feature[j].ratey;
+				n++;
+			}
+		}
+		charname[i].ratex = charname[i].ratex / n;
+		charname[i].ratey = charname[i].ratey / n;
+	}
 }
 int OptSample(CHARACTER *database_Char, CHARACTER& input_Char,int min_err, int file_count)
 {
@@ -134,9 +178,84 @@ int OptSample(CHARACTER *database_Char, CHARACTER& input_Char,int min_err, int f
 			{
 				min_err2 = err2;
 				num = i;
-			}
-				
+			}	
 		}
 	}
 	return num;
+}
+void Binary(Mat B)
+{
+	for (int i = 0; i < B.rows; i++)
+	{
+		for (int j = 0; j < B.cols; j++)
+			if (B.at<unsigned char>(i, j) > 130) B.at<unsigned char>(i, j) = 0;
+			else B.at<unsigned char>(i, j) = 255;
+	}
+	dilate(B, B, Mat(), Point(-1, -1), 1); //팽창
+	erode(B, B, Mat(), Point(-1, -1), 1);  //침식
+}
+void Find_MaxMin(Mat B,int* y_max,int* x_max,int* y_min,int* x_min)
+{
+	int y_temp = 0, x_temp = 0;
+	//라벨의 좌표 최대 최소 찾기
+	for (int i = 0; i <B.rows; i++)
+	{
+		for (int j = 0; j <B.cols; j++)
+		{
+			if (B.at<int>(i, j) >= 1)
+			{
+				y_temp = i;
+				x_temp = j;
+				y_max[B.at<int>(i, j)] = MAX(y_max[B.at<int>(i, j)], y_temp);
+				y_min[B.at<int>(i, j)] = MIN(y_min[B.at<int>(i, j)], y_temp);
+				x_max[B.at<int>(i, j)] = MAX(x_max[B.at<int>(i, j)], x_temp);
+				x_min[B.at<int>(i, j)] = MIN(x_min[B.at<int>(i, j)], x_temp);
+			}
+		}
+	}
+}
+void MakingBox(Mat in, Mat out, Mat B, int* y_max, int* x_max, int* y_min, int* x_min,int label_count)
+{
+
+	int x=0, y=0;
+	int *temp = (int*)calloc(label_count, sizeof(int));
+	for (int i = 1; i < label_count; i++)
+	{
+		for (int j = y_min[i]; j < y_max[i]; j++)
+		{
+			for (int k = x_min[i]; k < x_max[i]; k++)
+			{
+				if (temp[i] != 1)
+				{
+					if ((in.at<int>(j, k) != 0) && (in.at<int>(j, k) != i))
+					{
+						if ((y_max[in.at<int>(j, k)] < y_max[i]) && (x_max[in.at<int>(j, k)] < x_max[i]) && (y_min[in.at<int>(j, k)] > y_min[i]) && (x_min[in.at<int>(j, k)] > x_min[i]))
+						{
+							//C.at<uchar>(j, k) = B.at<uchar>(j, k);
+							temp[in.at<int>(j, k)] = 1;
+						}
+					}
+				}
+			}
+		}
+			
+	}
+	for (int i = 1; i < label_count; i++)
+	{
+		if (temp[i] != 1)
+		{
+			y = y_min[i];
+			for (x = x_min[i]; x <= x_max[i]; x++)
+				out.at<unsigned char>(y, x) = 255;
+			y = y_max[i];
+			for (x = x_min[i]; x <= x_max[i]; x++)
+				out.at<unsigned char >(y, x) = 255;
+			x = x_min[i];
+			for (y = y_min[i]; y <= y_max[i]; y++)
+				out.at<unsigned char>(y, x) = 255;
+			x = x_max[i];
+			for (y = y_min[i]; y <= y_max[i]; y++)
+				out.at<unsigned char>(y, x) = 255;
+		}
+	}	
 }
